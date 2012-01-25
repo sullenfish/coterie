@@ -1,0 +1,332 @@
+@body-width: 1200px;
+@lookup-display: none;
+@menu-blue: #b4c7e7;
+@menu-width: 250px;
+/* Primary Brand Colors */
+@wells-fargo-red: #BB0826;
+@wells-fargo-yellow: #FCC60A;
+@wells-fargo-gray: #8F8F8F;
+/* Secondary Brand Colors: Active Palette */
+@wells-fargo-green: #739600;
+@wells-fargo-lime: #C2BF00;
+@wells-fargo-tangerine: #F28B13;
+@wells-fargo-orange: #F25316;
+@wells-fargo-blue: #688FCF;
+@wells-fargo-purple: #631D76;
+@wells-fargo-brown: #704610;
+/* Secondary Brand Colors: Neutral Palette */
+@wells-fargo-light-gray: #E0E3E2;
+@wells-fargo-dark-gray: #44464A;
+@wells-fargo-stone: #D7D3C7;
+@wells-fargo-breeze: #DADBBF;
+@wells-fargo-khaki: #A9B089;
+@wells-fargo-air: #F2E2BD;
+
+.bold {
+	font-weight: bold;
+}
+.box-shadow (@y-offset: 4px, @x-offset: 4px, @blur: 4px, @shadow-color: #000000) {
+	box-shadow: @y-offset @x-offset @blur @shadow-color;
+	-ms-box-shadow: @y-offset @x-offset @blur @shadow-color;
+	-webkit-box-shadow: @y-offset @x-offset @blur @shadow-color;
+}
+.lower-latin {
+	list-style-type: lower-latin;
+}
+
+* {
+	//border: 1px solid green;
+	font-family: Verdana;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	text-indent: 0;
+}
+a {
+	color: darken(@wells-fargo-blue, 5%);
+	font-family: Verdana;
+	font-size: 0.75em;
+	text-decoration: none;
+	
+	&:hover {
+		text-decoration: underline;
+	}
+}
+body {
+	height: 100%;
+	min-width: @body-width;
+	overflow: visible;
+	width: @body-width;
+}
+article, div, header, footer {
+	display: block;
+	padding: 4px;
+
+	#header {
+		font-weight: normal;
+	}
+	#results {
+		height: 4em;
+	}
+	#resultsWrapper {
+		background-color: white;
+		margin-bottom: 1em;
+		margin-top: 1em;
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+h1 {
+	margin-bottom: 8px;
+}
+h2 {
+	font-size: 1.25em;
+	margin-bottom: 24px;
+}
+h3 {
+	font-size: 1em;
+	margin-bottom: 8px;
+}
+h4 {
+	font-size: 0.9em;
+	margin-bottom: 6px;
+}
+html {
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+li {
+	font-family: Georgia;
+	font-weight: bold;
+	margin: 0.25em 0;
+
+	li {
+	font-weight: normal;
+	margin: 0;
+	}
+}
+table {
+	background-color: white;
+	border-collapse: collapse;
+	font-size: 1.15em;
+	&.blue-table {
+		/*
+		background-color: transparent;
+		border-collapse: separate;
+		*/
+		font-size: 0.85em;
+		td, th {
+			border: 1px none transparent;
+		}
+		td {
+			background-color: lighten(@wells-fargo-blue, 10%);
+		}
+		th {
+			background-color: darken(@wells-fargo-blue, 10%);
+			color: black;
+		}
+		tr {
+			&:nth-child(odd) {
+				td {
+					background-color: lighten(@wells-fargo-blue, 20%);
+				}
+			}
+			/* IE6 Workaround for "&:nth-child(odd), &.odd" */
+			&.odd {
+				td {
+					background-color: lighten(@wells-fargo-blue, 20%);
+				}
+			}
+		}
+	}
+}
+td, th {
+	border: 1px solid black;
+	padding: 8px;
+}
+th {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+ul {
+	list-style-type: none;
+	margin: 0.25em 0 0.5em 1em;
+	
+	&.bulleted, &.bullets {
+		list-style-type: disc;
+		
+		li {
+			margin-left: 1.5em;
+		}
+	}
+}
+#article {
+	ol, ul {
+		margin: 0.25em 0 0.5em 0;
+		padding-left: 0;
+		
+		li {
+			font-family: Verdana;
+			font-size: 0.9em;
+			font-weight: normal;
+			a {
+				font-size: 1em;
+				font-weight: bold;
+			}
+			ol, ul {
+				margin-left: 1em;
+			}
+		}
+	}
+	ol {
+		font-size: 0.9em;
+		margin-left: 2em;
+	}
+	ul {
+		list-style-type: disc;
+		li {
+			margin-left: 1.5em;
+		}
+	}
+}
+#content, #menu {
+	/*behavior: url(PIE.htc);*/
+	border-radius: 8px;
+	.box-shadow(0, 0, 8px, @wells-fargo-dark-gray);
+	/*float: left;*/
+	margin: 6px;
+	
+	li {
+		border-radius: 8px;
+	}
+}
+#content {
+	background-color: #F3E5C4; /*#F2E2BD*/
+	border: 1px solid #F3E5C4; /*#F2E2BD*/
+	/*height: 464px;*/
+	margin-left: @menu-width + 20px;
+	min-height: 464px;
+	padding: 12px;
+	/*position: absolute;*/
+	width: 800px;
+	
+	em {
+		color: darken(@wells-fargo-green, 5%);
+		font-weight: bold;
+	}
+	
+	h1, h2, h3, h4, h5 {
+		color: @wells-fargo-orange;
+		font-family: Georgia;
+	}
+	
+	h2 {
+		margin-bottom: 8px;
+	}
+	
+	h3, h4 {
+		margin-bottom: 4px;
+	}
+	
+	p {
+		font-size: 0.9em;
+		line-height: 1.35em;
+		margin-bottom: 0.5em;
+	}
+	/*
+	#article, #debug, #external {
+		border: 1px solid #000000;
+	}
+	*/
+}
+#debug {
+	.box-shadow(0, 0, 1px, black);
+	display: none;
+}
+#external {
+	font-size: 0.9em;
+	margin-top: 1em;
+}
+#footer {
+	//clear: both;
+	font-size: 9px;
+	margin: 12px 12px 12px @menu-width + 20px;
+	z-index: -1;
+}
+#header {
+	border-bottom: 1px solid @wells-fargo-orange;
+	color: @wells-fargo-dark-gray;
+	font-family: Georgia;
+	font-size: 2em;
+	font-weight: bold;
+	margin: 8px;
+	padding-bottom: 8px;
+}
+#lookup {
+	display: @lookup-display;
+}
+/*
+#main {
+		background-color: red;
+		position: relative;
+}
+*/
+#menu {
+	background-color: @menu-blue;
+	border: 1px solid @menu-blue;
+	/*border: 1px solid #44464A;*/
+	float: left;
+	font-size: 12px; /*14px;*/
+	/*height: 464px;*/
+	left: 0;
+	position: relative;
+	/*top: 67px;*/
+	/*top: 95px;*/
+	width: @menu-width; /*172px;*/
+	
+	a {
+		color: black;
+		font-family: Georgia;
+		text-decoration: none;
+	}
+	
+	li {
+		cursor: default;
+		padding: 0 4px;
+		
+		li {
+			font-size: 11px;
+			padding-top: 2px;
+
+			a {
+				background-color: @menu-blue;
+				display: block;
+				width: 100%;
+			}
+			&:hover, &.hover {
+				background-color: lighten(@menu-blue, 10%);
+				
+				a {
+					background-color: lighten(@menu-blue, 10%);
+				}
+			}
+			&.link {
+				cursor: pointer;
+			}
+		}
+		&:hover, &.hover {
+			background-color: lighten(@menu-blue, 5%);
+			
+			a {
+				background-color: lighten(@menu-blue, 5%);
+			}
+		}
+		&.link {
+			cursor: pointer;
+		}
+	}	
+}
+/* IE6 workarounds */
+* html #content { height: 464px; }

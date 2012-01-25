@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Coterie</title>
+		<!--[if lt IE 9]>
+		<script type='text/javascript' src='./lib/js/html5.js'></script>
+		<style>.gainlayout { min-width: 0; }</style>
+		<![endif]-->
+		<!--[if lte IE 6]>
+		<script>window.MooToolsCoreVersion = '1.4.2';</script>
+		<style>.gainlayout { height: 1px; }</style>
+		<![endif]-->
+		<link rel='stylesheet/css' href='./lib/css/normalize.css' type='text/css' media='screen' charset='utf-8' />
+		<style type='text/css'>
+			div {
+				-webkit-box-shadow: 0 0 1px #808080;
+			}
+			#outer, #outer div {
+				margin: 8px;
+				padding: 8px;
+			}
+			#pageConsole {
+				background-color: #F5F5F5;
+				height: 10em;
+				opacity: 0;
+				overflow-y: auto;
+				visibility: hidden;
+			}
+		</style>
+		<script type='text/javascript' src='./lib/js/less-1.2.0.min.js'></script>
+		<script type='text/javascript' src='./lib/js/require.js'></script>
+		<script type='text/javascript'>
+			(function(){
+				var MooToolsCoreVersion = window.MooToolsCoreVersion || '1.4.3', required = {
+					substitutions: {
+						base: './lib/js/'
+					},
+					library: [
+						['{base}mootools-core-' + MooToolsCoreVersion + '-full-nocompat-yc.js'],
+						['{base}mootools-more-1.4.0.1-smoothscroll-uri-nocompat-yc.js',
+							'{base}Company.js',
+							'{base}mootools.history.js'],
+						['{base}powertools-1.1.0-singleton.js',
+							'{base}debugUnit.js', 
+							'{base}stacktrace-min-0.3.js'],
+						['{base}order!{base}mootools-more-1.4.0.1-table-nocompat.js',
+							'{base}order!{base}Element.Data.js',
+							'{base}order!{base}BehaviorAPI.js',
+							'{base}order!{base}Behavior.js',
+							//'{base}order!{base}Event.Mock.js',
+							//'{base}order!{base}Delegator.js',
+							//'{base}order!{base}Behavior.Startup.js',
+							'{base}domReady!']
+					]
+				};
+				required.library = required.library.map(function(list){
+					return list.map(function(item){
+						for (var substitution in this.substitutions){
+							if (substitution !== undefined) {
+								item = item.replace(new RegExp('{' + substitution + '}', 'g'), this.substitutions[substitution]);
+							}
+						}
+						return item;
+					}, required);
+				}, required);
+				require(required.library[0], function() {
+					require(required.library[1], function() {
+						this.debugSettings = {
+							enabled: true,
+							logToElement: {
+								enabled: true,
+								id: 'pageConsole',
+								visible: true
+							},
+							verbose: false
+						};
+						require(required.library[2], function() {
+							var utilityUnit = new Unit({
+								initSetup: function(){
+									// reposition the browser to match parent or fall back to upper left
+									window.resizeTo(window.screen.availWidth, window.screen.availHeight);
+									var winPos = window.parent.getPosition();
+									window.moveTo(winPos.x, winPos.y);
+								},
+								readySetup: function(){
+									this.publish('!console.log', ["%c%s%c dom is ready", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;']);
+								}
+							});
+							var historyUnit = new Unit({
+								initSetup: function(){
+									this.winFx = new Fx.Scroll(window);
+									History.replaceState({bookmark: 'theTop', state: 0}, document.title + ': Welcome', '?bookmark=theTop;');
+									this.subscribe('switchboard.local', this.storeLocation);
+									this.subscribe('switchboard.bookmark', this.storeBookmark);
+									window.addEvents({
+										'statechange': this.statechange.bind(this),
+										'beforeunload': function(event){
+										},
+										'unload': function(){
+										}
+									});
+								},
+								scrollPage: function(href){
+									var bookmark = document.id(href);
+									this.winFx.toElement(bookmark); 
+									this.publish('!console.log', ["%c%s%c scrolling to: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', bookmark.get('id')]);
+									return;
+								},
+								statechange: function(){
+									var state = History.getState(); // Note: We are using History.getState() instead of event.state
+									//History.log(state.data, state.title, state.url);
+									if (state.data.bookmark !== undefined){
+										this.scrollPage(state.data.bookmark);
+									} else {
+										this.winFx.toTop();
+										this.publish('!console.log', ["%c%s%c scrolling to top of window", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;']);
+									}
+									this.publish('!console.log', ["%c%s%c state: %s - statechange: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state.data.state, state.title]);
+								},
+								storeBookmark: function(href){
+									var state = History.getState().data.state + 1;
+									pageState = state;
+									History.pushState({bookmark: href, state: state}, document.title.split(' (')[0] + ' (' + href + ')', "?bookmark=" + href);
+									this.publish('!console.log', ["%c%s%c state: %s - window.location: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state, window.location]);
+								},
+								storeLocation: function(href){
+									var state = History.getState().data.state + 1;
+									pageState = state;
+									History.pushState({ajax: href, state: state}, document.title.split(':')[0] + ': ' + href, "?place=" + href);
+									this.publish('!console.log', ["%c%s%c state: %s - window.location: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state, window.location]);
+								}
+							});
+							var switchBoardUnit = new Unit({
+								Prefix: 'switchboard',
+								initSetup: function(){
+									this.subscribe('switchboard.route', this.route);
+								},
+								route: function(href){
+									if (href.test('^[^#]')){
+										this.publish('local', href);
+									} else {
+										this.publish('bookmark', href.substr(1));
+										//var winFx = new Fx.Scroll(window).toElement($$(href)[0]); 
+									}
+								}
+							});
+							require(required.library[3], function() {
+								window.fireEvent('domready');
+								Behavior.addGlobalFilters({
+									'Console': function(element, api){
+										if (api.get('open')){
+											element.fade('in');
+										} else {
+											element.fade('out');
+										}
+										new Unit({
+											readySetup: function(){
+												this.element = element;
+												this.scrollLock = false;
+												this.lastScrollY = this.element.getScroll().y;
+												this.element.addEvent('scroll', function(event, target){
+													if (!this.scrollLock && this.element.getScroll().y < this.lastScrollY){
+														this.scrollLock = true;
+													} else if (this.scrollLock && this.element.getScrollSize().y - this.element.getSize().y == this.element.getScroll().y){
+														this.scrollLock = false;
+													}
+													this.lastScrollY = this.element.getScroll().y;
+												}.bind(this));
+												this.consoleScroller = new Fx.Scroll(this.element, {
+													duration: 50,
+													fps: 50,
+													link: 'chain',
+													transition: 'linear'
+												});
+												this.subscribe('!console.log', this.scroll)
+											},
+											scroll: function(){
+												if (!this.scrollLock){
+													this.consoleScroller.toBottom();
+												}
+											}
+										});
+									},
+									'Copyright': function(element){
+										var copyrightYearElement = element.getElement('.copyrightYear');
+										if (copyrightYearElement) {
+											var currentYear = (new Date()).getFullYear();
+											if (Number.from(copyrightYearElement.get('text')) < currentYear) {
+												copyrightYearElement.appendText('-' + currentYear);
+											}
+										}
+										return copyrightYearElement;
+									},
+									'Menu': function(element){
+										var menuUnit = new Unit({
+											readySetup: function(){
+												element.addEvent('click:relay(a)', function(event, element){
+													event.stop();
+													if (element){
+														var href=element.get('href');
+														this.publish('!switchboard.route', href);
+													}
+												}.bind(this));
+											}
+										});
+									}
+								});
+								var pageBehavior = new Behavior().apply(document.body);
+							});
+						});
+					});
+				});
+			})();
+		</script>
+	</head>
+	<body>
+		<!-- header -->
+		<header id='pageHeader'>
+			<h1>Coterie</h1>
+		</header>
+		<!-- main panel -->
+		<div class='gainlayout' id='pageMain'>
+			<!-- menu -->
+			<nav data-behavior='Menu' class='gainlayout' id='pageNav'>
+				<ul>
+					<li>
+						<a href='General'>General</a>
+						<ul>
+							<li>
+								<a href='LessGeneral'>Less General</a>
+								<ul>
+									<li><a href='Specific'>Specific</a></li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+					<li>Jump Around
+						<ul>
+							<li><a href='#theTop'>Hash Link: Top</a></li>
+							<li><a href='#theMiddle'>Hash Link: Middle</a></li>
+							<li><a href='#theBottom'>Hash Link: Bottom</a></li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<!-- main content -->
+			<div class='gainlayout' id='mainContent'>
+				<!-- main article content-->
+				<article class='gainlayout' id='mainArticle'></article>
+				<!-- reference content -->
+				<article class='gainlayout' id='mainExternal'></article>
+				<!-- console -->
+				<div class='gainlayout' data-behavior='Console' data-console-options='{"open":true}' id='pageConsole'>
+					<h2>Console</h2>
+				</div>
+			</div>
+		</div>
+		<!-- footer -->
+		<footer data-behavior='Copyright' id='pageFooter'>
+			&copy; <span class='copyrightYear'>2011</span> Frederick J. Ostrander. All rights reserved.
+		</footer>
+		<!-- modal -->
+		<div data-behavior='Modal' id='pageModal'>
+			<!-- modal content container -->
+		</div>
+		<div data-behavior="Menu">
+			<div id='theTop' style='position: absolute; right: 1em; top: 0;'>I am at the top!</div>
+			<div id='theMiddle' style='position: absolute; right: 1em; top: 1024px;'>I am at the middle! <a href='#theTop'>Back to the top.</a></div>
+			<div id='theBottom' style='position: absolute; right: 1em; top: 2048px;'>I am at the bottom! <a href='#theTop'>Back to the top.</a></div>
+		</div>
+	</body>
+</html>

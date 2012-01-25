@@ -1,0 +1,49 @@
+* {
+    font-family: arial;
+    position: relative;
+}
+div {
+    border: 1px solid gray;
+    padding: 4px;
+}
+div#header {
+    font-weight: bold;
+}
+div#results {
+    height: 4em;
+}
+div#resultsWrapper {
+    background-color: white;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    opacity: 0;
+    visibility: hidden;
+}
+h1, h2 {
+    margin: 0;
+    padding: 0;
+}
+h1 {
+    margin-bottom: 8px;
+}
+h2 {
+    font-size: 1.25em;
+    margin-bottom: 24px;
+}
+html {
+	background-color: #f5f5f5;
+}
+table {
+	background-color: white;
+    border-collapse: collapse;
+    font-size: 1.15em;
+}
+td, th {
+    border: 1px solid black;
+    padding: 8px;
+}
+th {
+    background-color: black;
+    color: white;
+    font-weight: bold;
+}
