@@ -144,7 +144,15 @@
 								}
 							});
 							require(required.library[3], function() {
-								window.fireEvent('domready:once'); // TODO: domready firing multiple times; using once is a temporary fix
+								/*
+								 * TODO: domready firing multiple times in non-IE
+								 * browsers; using once is a temporary fix
+								 */
+								if (Browser.ie) {
+									window.fireEvent('domready');
+								} else {
+								window.fireEvent('domready:once'); 
+								}
 								Behavior.addGlobalFilters({
 									'Anchors': function(element){
 										var anchorUnit = new Unit({
@@ -210,7 +218,7 @@
 											conjure: function(invocation){
 												switch (invocation) {
 													case 'summon':
-														document.addEvent('keydown:keys(esc):once', function(event){
+														document.addEvent('keydown:keys(esc)', function(event){
 													    	this.publish('modal.conjure', 'dismiss');
 														}.bind(this));
 														if (Browser.ie6) {
@@ -257,7 +265,7 @@
 													this.element.getElement('.modal-box').setStyles({
 														'opacity': 0
 													});
-													this.element.getElement('.pageModal').setStyles({
+													this.shim.setStyles({
 														'opacity': 0,
 														'position': 'absolute'
 													});
@@ -270,8 +278,8 @@
 													this.element.getElement('.modal-content').setStyle('max-height', maxHeight);
 													return false;
 												}.bind(this));
-												this.element.addEvent('dblclick:once', this.conjure.bind(this, 'dismiss'));
-												this.shim.addEvent('click:once', this.conjure.bind(this, 'dismiss'));
+												this.element.addEvent('dblclick', this.conjure.bind(this, 'dismiss'));
+												this.shim.addEvent('click', this.conjure.bind(this, 'dismiss'));
 												this.subscribe('modal.conjure', this.conjure);
 												// test
 												//(function(){this.publish('modal.conjure', 'summon')}).delay(2000, this);
