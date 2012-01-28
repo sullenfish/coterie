@@ -1,0 +1,132 @@
+html, body {
+	background-color: #CCCCCC;
+	font-family: Arial, Helvetica, sans-serif;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+/*
+ * {
+ -webkit-box-shadow: 0 0 1px red;
+ }
+ */
+
+#outer, #outer div {
+	margin: 8px;
+	padding: 8px;
+}
+
+#pageConsole {
+	background-color: #F5F5F5;
+	height: 10em;
+	opacity: 0;
+	overflow-y: auto;
+	visibility: hidden;
+}
+
+#pageFooter, #pageHeader, #pageMain {
+	padding: 0 40px;
+}
+
+#pageMainContent {
+	background-color: #EAEAEA;
+	margin-bottom: 16px;
+}
+
+#pageModal {
+	background-color: #0D3349;
+	height: 100%;
+	left: 0;
+	opacity: 0;
+	position: fixed;
+	top: 0;
+	visibility: hidden;
+	width: 100%;
+	z-index: 100;
+}
+
+.modal {
+	background-color: #0D3349;
+	height: 100%;
+	left: -100%;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 150;
+}
+
+.modal-tbody, .modal-tr, .modal-td {
+	height: 100%; /* All table elements should be height 100% */
+}
+
+.modal-td {
+	vertical-align: middle;
+}
+
+.modal-box {
+	background-color: #eaeaea;
+	border: 1px solid;
+	border-radius: 25px;
+	height: auto;
+	left: 100%;
+	margin: 0 auto;
+	//max-height: 80%;
+	//max-width: 90%;
+	//min-height: 80px;
+	//min-width: 80px;
+	opacity: 0;
+	position: relative;
+	top: 200px; /* start from "hidden" position */
+	visibility: hidden; /* start hidden */
+	width: 800px;
+}
+
+.modal-content {
+	overflow: auto;
+
+	&::-webkit-scrollbar {
+		background-color: rgba(0,0,0,0.1);
+		width: 8px;
+	}
+	
+	&::-webkit-scrollbar-track {
+		border-radius: 10px;
+		-webkit-border-radius: 10px;
+		-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.25);
+	}
+	
+	&::-webkit-scrollbar-thumb {
+		background: rgba(0,0,0,0.1);
+		border-radius: 10px;
+		-webkit-border-radius: 10px;
+		-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+	
+		&:window-inactive {
+			background: rgba(0,0,0,0.05); 
+		}
+	}
+}
+
+.modal-body {
+	margin: 32px auto;
+	text-align: center;
+	
+	img {
+		border-radius: 10px;
+	}
+}
+
+.modal-header, .modal-footer {
+	background: rgba(0,0,0,0.15);
+}
+
+.modal-footer {
+	border-radius: 0 0 25px 25px;
+	height: 25px;	
+}
+
+.modal-header {
+	border-radius: 25px 25px 0 0;
+	height: 25px;
+}

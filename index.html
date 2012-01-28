@@ -15,109 +15,7 @@
 		<style>.gainlayout { height: 1px; }</style>
 		<![endif]-->
 		<link rel='stylesheet/css' href='./lib/css/normalize.css' type='text/css' media='screen' charset='utf-8' />
-		<style type='text/css'>
-			html, body {
-				background-color: #CCCCCC;
-				height: 100%;
-				margin: 0;
-				padding: 0;
-			}
-			/*
-			* {
-				-webkit-box-shadow: 0 0 1px red;
-			}
-			*/
-			#outer, #outer div {
-				margin: 8px;
-				padding: 8px;
-			}
-			#pageConsole {
-				background-color: #F5F5F5;
-				height: 10em;
-				opacity: 0;
-				overflow-y: auto;
-				visibility: hidden;
-			}
-			#pageFooter, #pageHeader, #pageMain {
-				padding: 0 40px;
-			}
-			#pageMainContent {
-				background-color: #EAEAEA;
-				margin-bottom: 16px;
-			}
-			#pageModal {
-				background-color: #0D3349;
-				height: 100%;
-				left: 0;
-				opacity: 0;
-				position: fixed;
-				top: 0;
-				visibility: hidden;
-				width: 100%;
-				z-index: 100;
-			}
-			.modal
-			{
-			    background-color: #0D3349;
-			    height: 100%;
-			    left: -100%;
-			    position: fixed;
-			    top: 0; 
-			    width: 100%;
-			    z-index: 150;
-			}
-			.modal-tbody, .modal-tr, .modal-td
-			{
-			    height: 100%; /* All table elements should be height 100% */
-			}
-			.modal-td
-			{
-			    vertical-align: middle;
-			}
-			.modal-box
-			{
-			    background-color: #eaeaea;
-			    border: 1px solid;
-			    border-radius: 25px;
-			    height: auto;
-			    left: 100%;
-			    margin: 0 auto;
-			    /*
-			    max-height: 80%;
-			    max-width: 90%;
-			    min-height: 80px;
-			    min-width: 80px;
-			    */
-			 	opacity: 0;
-			    position: relative;
-			    top: 200px; /* start from "hidden" position */
-			    visibility: hidden; /* start hidden */
-			    width: 800px;				
-			}
-			.modal-content
-			{
-			    overflow: auto;
-			}
-			.modal-content::-webkit-scrollbar {
-				background-color: rgba(0,0,0,0.1);
-			    width: 8px;
-			}
-			.modal-content::-webkit-scrollbar-track {
-			    -webkit-box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.3);
-			    border-radius: 10px;
-			}
-			.modal-content::-webkit-scrollbar-thumb {
-			    border-radius: 10px;
-			    -webkit-box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.5);
-			}
-			.modal-body {
-				margin: 32px auto;
-				text-align: center;
-			}
-			.modal-body img {
-				border-radius: 10px;
-			}
-		</style>
+		<link rel='stylesheet/less' href='./lib/css/coterie.css' type='text/css' media='screen'charset='utf-8' />
 		<script type='text/javascript' src='./lib/js/less-1.2.0.min.js'></script>
 		<script type='text/javascript' src='./lib/js/require.js'></script>
 		<script type='text/javascript'>
@@ -128,14 +26,13 @@
 					},
 					library: [
 						['{base}mootools-core-' + MooToolsCoreVersion + '-full-nocompat-yc.js'],
-						['{base}mootools-more-1.4.0.1-smoothscroll-uri-nocompat-yc.js',
+						['{base}mootools-more-1.4.0.1-yc.js',
 							'{base}Company.js',
 							'{base}mootools.history.js'],
 						['{base}powertools-1.1.0-singleton.js',
 							'{base}debugUnit.js', 
 							'{base}stacktrace-min-0.3.js'],
-						['{base}order!{base}mootools-more-1.4.0.1-table-nocompat.js',
-							'{base}order!{base}Element.Data.js',
+						['{base}order!{base}Element.Data.js',
 							'{base}order!{base}BehaviorAPI.js',
 							'{base}order!{base}Behavior.js',
 							//'{base}order!{base}Event.Mock.js',
@@ -247,9 +144,7 @@
 								}
 							});
 							require(required.library[3], function() {
-								if (Browser.ie) {
-									window.fireEvent('domready');
-								}
+								window.fireEvent('domready:once'); // TODO: domready firing multiple times; using once is a temporary fix
 								Behavior.addGlobalFilters({
 									'Anchors': function(element){
 										var anchorUnit = new Unit({
@@ -315,10 +210,8 @@
 											conjure: function(invocation){
 												switch (invocation) {
 													case 'summon':
-														document.addEvent('keydown', function(event){
-														    if (event.key == 'esc'){
-														    	this.publish('modal.conjure', 'dismiss');
-														    }
+														document.addEvent('keydown:keys(esc):once', function(event){
+													    	this.publish('modal.conjure', 'dismiss');
 														}.bind(this));
 														if (Browser.ie6) {
 															this.element.setStyles({
@@ -377,8 +270,8 @@
 													this.element.getElement('.modal-content').setStyle('max-height', maxHeight);
 													return false;
 												}.bind(this));
-												this.element.addEvent('dblclick', this.conjure.bind(this, 'dismiss'));
-												this.shim.addEvent('click', this.conjure.bind(this, 'dismiss'));
+												this.element.addEvent('dblclick:once', this.conjure.bind(this, 'dismiss'));
+												this.shim.addEvent('click:once', this.conjure.bind(this, 'dismiss'));
 												this.subscribe('modal.conjure', this.conjure);
 												// test
 												//(function(){this.publish('modal.conjure', 'summon')}).delay(2000, this);
@@ -429,12 +322,16 @@
 		</script>
 	</head>
 	<body>
+		
 		<!-- header -->
 		<header id='pageHeader'>
 			<h1>Coterie</h1>
+			<h2>an experimental, client-side-heavy, modular, single-page engine with behavior abstraction</h2>
 		</header>
+		
 		<!-- main panel -->
 		<div class='gainlayout' id='pageMain'>
+			
 			<!-- menu -->
 			<nav data-behavior='Anchors' class='gainlayout' id='pageNav'>
 				<ul>
@@ -454,8 +351,10 @@
 					</li>
 				</ul>
 			</nav>
+			
 			<!-- main content -->
 			<div class='gainlayout' data-behavior='Anchors TwoPanelAJAX' id='pageMainContent'>
+				
 				<!-- main article content-->
 				<article class='gainlayout' id='pageMainArticle'>
 					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
@@ -465,32 +364,41 @@
 					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
 					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
 				</article>
+				
 				<!-- reference content -->
 				<article class='gainlayout' id='pageMainExternal'></article>
+				
 				<!-- console -->
 				<div class='gainlayout' data-behavior='Console' data-console-options='{"open":true}' id='pageConsole'>
 					<h2>Console</h2>
 				</div>
 			</div>
 		</div>
+		
 		<!-- footer -->
 		<footer data-behavior='Copyright' id='pageFooter'>
 			&copy; <span class='copyrightYear'>2011</span> Frederick J. Ostrander. All rights reserved.
 		</footer>
+		
 		<!-- modal -->
-		<div id='pageModal'></div>
-		<table data-behavior='Modal' data-modal-options='{"margin":50}' class="modal" summary="Modal Window">
+		<div id='pageModal'> <!-- modal shim --> </div>
+		
+		<!-- actual modal window -->
+		<!--	Inspired (if not outright stolen) from Daniel Buchner's amazing
+				Best Damn Modal Method Period
+				http://www.backalleycoder.com/2011/11/16/best-damn-modal-method-period%E2%84%A2/	-->
+		<table data-behavior='Modal' data-modal-options='{"margin":25}' class="modal" summary="Modal Window">
 			<tbody class="modal-tbody">
 	    		<tr class="modal-tr">
 	    			<td class="modal-td">
 	    				<div class="modal-box">
-	    					<div class="modal-header"></div>
+	    					<div class="modal-header"> <!-- header placeholder --> </div>
 	            			<div class="modal-content">
     	          				<div class="modal-body">
         	      					<img alt="Chanel Licking Fred's Face" src="./lib/img/Chanel Licking Fred's Face 2@Pola(20110118213522).png" />
 	              				</div>
             				</div>
-            				<div class="modal-footer"></div>
+            				<div class="modal-footer"> <!-- footer placeholder --> </div>
             			</div>
 	      			</td>
 	    		</tr>
