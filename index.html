@@ -16,9 +16,17 @@
 		<![endif]-->
 		<link rel='stylesheet/css' href='./lib/css/normalize.css' type='text/css' media='screen' charset='utf-8' />
 		<style type='text/css'>
-			div {
-				-webkit-box-shadow: 0 0 1px #808080;
+			html, body {
+				background-color: #CCCCCC;
+				height: 100%;
+				margin: 0;
+				padding: 0;
 			}
+			/*
+			* {
+				-webkit-box-shadow: 0 0 1px red;
+			}
+			*/
 			#outer, #outer div {
 				margin: 8px;
 				padding: 8px;
@@ -29,6 +37,85 @@
 				opacity: 0;
 				overflow-y: auto;
 				visibility: hidden;
+			}
+			#pageFooter, #pageHeader, #pageMain {
+				padding: 0 40px;
+			}
+			#pageMainContent {
+				background-color: #EAEAEA;
+				margin-bottom: 16px;
+			}
+			#pageModal {
+				background-color: #0D3349;
+				height: 100%;
+				left: 0;
+				opacity: 0;
+				position: fixed;
+				top: 0;
+				visibility: hidden;
+				width: 100%;
+				z-index: 100;
+			}
+			.modal
+			{
+			    background-color: #0D3349;
+			    height: 100%;
+			    left: -100%;
+			    position: fixed;
+			    top: 0; 
+			    width: 100%;
+			    z-index: 150;
+			}
+			.modal-tbody, .modal-tr, .modal-td
+			{
+			    height: 100%; /* All table elements should be height 100% */
+			}
+			.modal-td
+			{
+			    vertical-align: middle;
+			}
+			.modal-box
+			{
+			    background-color: #eaeaea;
+			    border: 1px solid;
+			    border-radius: 25px;
+			    height: auto;
+			    left: 100%;
+			    margin: 0 auto;
+			    /*
+			    max-height: 80%;
+			    max-width: 90%;
+			    min-height: 80px;
+			    min-width: 80px;
+			    */
+			 	opacity: 0;
+			    position: relative;
+			    top: 200px; /* start from "hidden" position */
+			    visibility: hidden; /* start hidden */
+			    width: 800px;				
+			}
+			.modal-content
+			{
+			    overflow: auto;
+			}
+			.modal-content::-webkit-scrollbar {
+				background-color: rgba(0,0,0,0.1);
+			    width: 8px;
+			}
+			.modal-content::-webkit-scrollbar-track {
+			    -webkit-box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.3);
+			    border-radius: 10px;
+			}
+			.modal-content::-webkit-scrollbar-thumb {
+			    border-radius: 10px;
+			    -webkit-box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.5);
+			}
+			.modal-body {
+				margin: 32px auto;
+				text-align: center;
+			}
+			.modal-body img {
+				border-radius: 10px;
 			}
 		</style>
 		<script type='text/javascript' src='./lib/js/less-1.2.0.min.js'></script>
@@ -93,15 +180,10 @@
 							var historyUnit = new Unit({
 								initSetup: function(){
 									this.winFx = new Fx.Scroll(window);
-									History.replaceState({bookmark: 'theTop', state: 0}, document.title + ': Welcome', '?bookmark=theTop;');
-									this.subscribe('switchboard.local', this.storeLocation);
-									this.subscribe('switchboard.bookmark', this.storeBookmark);
+									History.replaceState({state: 0}, document.title + ': Welcome', '?state=0;');
+									this.subscribe('switchboard.reroute', this.storeAnchor);
 									window.addEvents({
-										'statechange': this.statechange.bind(this),
-										'beforeunload': function(event){
-										},
-										'unload': function(){
-										}
+										'statechange': this.statechange.bind(this)
 									});
 								},
 								scrollPage: function(href){
@@ -111,26 +193,33 @@
 									return;
 								},
 								statechange: function(){
-									var state = History.getState(); // Note: We are using History.getState() instead of event.state
-									//History.log(state.data, state.title, state.url);
-									if (state.data.bookmark !== undefined){
-										this.scrollPage(state.data.bookmark);
-									} else {
+									var state = History.getState();
+									if (state.data.type == 'bookmark'){
+										this.scrollPage(state.data.anchor);
+									} else if (window.getScroll().y !== 0){
 										this.winFx.toTop();
 										this.publish('!console.log', ["%c%s%c scrolling to top of window", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;']);
 									}
 									this.publish('!console.log', ["%c%s%c state: %s - statechange: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state.data.state, state.title]);
 								},
-								storeBookmark: function(href){
-									var state = History.getState().data.state + 1;
+								storeAnchor: function(anchorMessage){
+									var anchor = anchorMessage.anchor,
+										name = anchorMessage.name,
+										type = anchorMessage.type,
+										state = History.getState().data.state + 1,
+										title;
 									pageState = state;
-									History.pushState({bookmark: href, state: state}, document.title.split(' (')[0] + ' (' + href + ')', "?bookmark=" + href);
-									this.publish('!console.log', ["%c%s%c state: %s - window.location: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state, window.location]);
-								},
-								storeLocation: function(href){
-									var state = History.getState().data.state + 1;
-									pageState = state;
-									History.pushState({ajax: href, state: state}, document.title.split(':')[0] + ': ' + href, "?place=" + href);
+									switch (type){
+										case 'ajax':
+											title = document.title.split(':')[0] + ': ' + name;
+											break;
+										case 'bookmark':
+											title = document.title.split(' (')[0] + ' (' + name + ')';
+											break;
+										default:
+											title = document.title.split(':')[0];
+									}
+									History.pushState({'anchor': anchor, 'name': name, 'state': state, 'type': type}, title, "?anchor=" + anchor + ";state=" + state + ";type=" + type + ';');
 									this.publish('!console.log', ["%c%s%c state: %s - window.location: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state, window.location]);
 								}
 							});
@@ -139,18 +228,43 @@
 								initSetup: function(){
 									this.subscribe('switchboard.route', this.route);
 								},
-								route: function(href){
-									if (href.test('^[^#]')){
-										this.publish('local', href);
+								route: function(sbuObj){
+									var href = sbuObj.href,
+										text = sbuObj.text;
+									if (href.test('^.*#$')){
+										this.publish('reroute', {anchor: href.slice(0, -1), name: text, type: 'ajax'});
+									} else if (href.test('^.*#.+$')) {
+										if (href.test('^.*#!.*$')) {
+											this.publish('!modal.conjure', 'summon');
+										} else {
+											this.publish('reroute', {anchor: href.split('#')[1], name: text, type: 'bookmark'});
+										}
+									} else if (href.test('^[^#]+$')) {
+										this.publish('reroute', {anchor: href, name: text, type: 'ajax'});
 									} else {
-										this.publish('bookmark', href.substr(1));
-										//var winFx = new Fx.Scroll(window).toElement($$(href)[0]); 
+										// noop -- yet
 									}
 								}
 							});
 							require(required.library[3], function() {
-								window.fireEvent('domready');
+								if (Browser.ie) {
+									window.fireEvent('domready');
+								}
 								Behavior.addGlobalFilters({
+									'Anchors': function(element){
+										var anchorUnit = new Unit({
+											readySetup: function(){
+												element.addEvent('click:relay(a)', function(event, element){
+													event.stop();
+													if (element){
+														var href=element.get('href'),
+															text=element.get('text');
+														this.publish('!switchboard.route', {href: href, text: text});
+													}
+												}.bind(this));
+											}
+										});
+									},
 									'Console': function(element, api){
 										if (api.get('open')){
 											element.fade('in');
@@ -195,16 +309,113 @@
 										}
 										return copyrightYearElement;
 									},
-									'Menu': function(element){
-										var menuUnit = new Unit({
+									'Modal': function(element, api){
+										var headerFooterMargin = api.get('margin');
+										var modalUnit = new Unit({
+											conjure: function(invocation){
+												switch (invocation) {
+													case 'summon':
+														document.addEvent('keydown', function(event){
+														    if (event.key == 'esc'){
+														    	this.publish('modal.conjure', 'dismiss');
+														    }
+														}.bind(this));
+														if (Browser.ie6) {
+															this.element.setStyles({
+																'display': 'block',
+																'height': window.getSize().y
+															});
+														}
+														this.element.getElement('.modal-box').morph({
+															opacity: [0, 1],
+															top: [200, 0],
+															visibility: ['hidden', 'visible']
+														});
+														this.shim.fade(0.5);
+														break;
+													case 'dismiss':
+														document.removeEvents('keydown');
+														var boxMorph = new Fx.Morph(this.element.getElement('.modal-box'), {
+															onComplete: function(){
+																if (Browser.ie6){
+																	this.element.setStyle('display', 'none');
+																}
+															}.bind(this)
+														});
+														boxMorph.start({
+															opacity: 0,
+															top: 200
+														});
+														this.shim.fade('out');
+														break;
+													default:
+												}
+											},
 											readySetup: function(){
-												element.addEvent('click:relay(a)', function(event, element){
-													event.stop();
-													if (element){
-														var href=element.get('href');
-														this.publish('!switchboard.route', href);
-													}
+												this.element = element;
+												this.shim = document.id(this.element).getPrevious('div');
+												//this.shim.fade('hide');
+												//this.element.fade('hide');
+												if (Browser.ie6){
+													this.element.setStyles({
+														'display': 'none',
+														'position': 'absolute'
+													});
+													this.element.getElement('.modal-box').setStyles({
+														'opacity': 0
+													});
+													this.element.getElement('.pageModal').setStyles({
+														'opacity': 0,
+														'position': 'absolute'
+													});
+													window.addEvent('scroll', function(){
+														this.element.setStyle('top', window.getScroll().y);
+													}.bind(this));
+												}
+												window.addEvent('resize', function(event){
+													var maxHeight = document.documentElement.offsetHeight - headerFooterMargin;
+													this.element.getElement('.modal-content').setStyle('max-height', maxHeight);
+													return false;
 												}.bind(this));
+												this.element.addEvent('dblclick', this.conjure.bind(this, 'dismiss'));
+												this.shim.addEvent('click', this.conjure.bind(this, 'dismiss'));
+												this.subscribe('modal.conjure', this.conjure);
+												// test
+												//(function(){this.publish('modal.conjure', 'summon')}).delay(2000, this);
+											}
+										});
+									},
+									'TwoPanelAJAX': function(element, api){
+										var articleUnit = new Unit({
+											loadPage: function(anchorMessage){
+												if (anchorMessage.type != 'ajax'){
+													return false;
+												}
+												this.article.set('load', {
+													evalScripts: false,
+													method: 'get',
+													noCache: Browser.ie,
+													onFailure: function(responseXHR){
+														if (responseXHR.status === 0){
+															var match = responseXHR.responseText.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+															if (match) {
+																this.article.set('html', match[1]);
+															}
+														} else {
+															// error message
+														}
+													}.bind(this)
+												});												
+												this.article.load(anchorMessage.anchor);
+											},
+											readySetup: function(){
+												this.article = element.getFirst('article');
+												this.subscribe('switchboard.reroute', this.loadPage);
+											}
+										});
+										var referenceUnit = new Unit({
+											readySetup: function(){
+												this.reference = element.getLast('article');
 											}
 										});
 									}
@@ -225,34 +436,37 @@
 		<!-- main panel -->
 		<div class='gainlayout' id='pageMain'>
 			<!-- menu -->
-			<nav data-behavior='Menu' class='gainlayout' id='pageNav'>
+			<nav data-behavior='Anchors' class='gainlayout' id='pageNav'>
 				<ul>
 					<li>
-						<a href='General'>General</a>
+						<a href='welcome.html'>Welcome to Coterie</a>
 						<ul>
 							<li>
-								<a href='LessGeneral'>Less General</a>
-								<ul>
-									<li><a href='Specific'>Specific</a></li>
-								</ul>
+								<a href='test-00.html'>Test Zero</a>: AJAX Content
+							</li>
+							<li>
+								<a href='test-01.html'>Test One</a>: AJAX Content
 							</li>
 						</ul>
 					</li>
-					<li>Jump Around
-						<ul>
-							<li><a href='#theTop'>Hash Link: Top</a></li>
-							<li><a href='#theMiddle'>Hash Link: Middle</a></li>
-							<li><a href='#theBottom'>Hash Link: Bottom</a></li>
-						</ul>
+					<li>
+						<a href='#!Modal'>Open Modal</a>
 					</li>
 				</ul>
 			</nav>
 			<!-- main content -->
-			<div class='gainlayout' id='mainContent'>
+			<div class='gainlayout' data-behavior='Anchors TwoPanelAJAX' id='pageMainContent'>
 				<!-- main article content-->
-				<article class='gainlayout' id='mainArticle'></article>
+				<article class='gainlayout' id='pageMainArticle'>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<br/>
+				</article>
 				<!-- reference content -->
-				<article class='gainlayout' id='mainExternal'></article>
+				<article class='gainlayout' id='pageMainExternal'></article>
 				<!-- console -->
 				<div class='gainlayout' data-behavior='Console' data-console-options='{"open":true}' id='pageConsole'>
 					<h2>Console</h2>
@@ -264,13 +478,23 @@
 			&copy; <span class='copyrightYear'>2011</span> Frederick J. Ostrander. All rights reserved.
 		</footer>
 		<!-- modal -->
-		<div data-behavior='Modal' id='pageModal'>
-			<!-- modal content container -->
-		</div>
-		<div data-behavior="Menu">
-			<div id='theTop' style='position: absolute; right: 1em; top: 0;'>I am at the top!</div>
-			<div id='theMiddle' style='position: absolute; right: 1em; top: 1024px;'>I am at the middle! <a href='#theTop'>Back to the top.</a></div>
-			<div id='theBottom' style='position: absolute; right: 1em; top: 2048px;'>I am at the bottom! <a href='#theTop'>Back to the top.</a></div>
-		</div>
+		<div id='pageModal'></div>
+		<table data-behavior='Modal' data-modal-options='{"margin":50}' class="modal" summary="Modal Window">
+			<tbody class="modal-tbody">
+	    		<tr class="modal-tr">
+	    			<td class="modal-td">
+	    				<div class="modal-box">
+	    					<div class="modal-header"></div>
+	            			<div class="modal-content">
+    	          				<div class="modal-body">
+        	      					<img alt="Chanel Licking Fred's Face" src="./lib/img/Chanel Licking Fred's Face 2@Pola(20110118213522).png" />
+	              				</div>
+            				</div>
+            				<div class="modal-footer"></div>
+            			</div>
+	      			</td>
+	    		</tr>
+	    	</tbody>
+		</table>
 	</body>
 </html>
