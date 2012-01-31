@@ -91,11 +91,18 @@
 								},
 								statechange: function(){
 									var state = History.getState();
-									if (state.data.type == 'bookmark'){
-										this.scrollPage(state.data.anchor);
-									} else if (window.getScroll().y !== 0){
-										this.winFx.toTop();
-										this.publish('!console.log', ["%c%s%c scrolling to top of window", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;']);
+									switch (state.data.type){
+										case 'ajax':
+											this.publish('ajax', state.data);
+											if (window.getScroll().y !== 0){ // TODO: move this to GUI Unit
+												this.winFx.toTop();
+												this.publish('!console.log', ["%c%s%c scrolling to top of window", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;']);
+											}
+											break;
+										case 'bookmark':
+											this.publish('bookmark', state.data);
+											this.scrollPage(state.data.anchor); // TODO: move this to GUI Unit
+											break;
 									}
 									this.publish('!console.log', ["%c%s%c state: %s - statechange: %s", 'font-weight: bold;', (new Date()).toLocaleTimeString(), 'font-weight: normal;', state.data.state, state.title]);
 								},
@@ -312,6 +319,7 @@
 											readySetup: function(){
 												this.article = element.getFirst('article');
 												this.subscribe('switchboard.reroute', this.loadPage);
+												this.subscribe('ajax', this.loadPage);
 											}
 										});
 										var referenceUnit = new Unit({
