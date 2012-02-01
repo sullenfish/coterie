@@ -63,6 +63,13 @@
 							verbose: false
 						};
 						require(required.library[2], function() {
+							if (window.console === undefined){
+								window.console = new Unit({
+									log: function(){
+										this.publish('!console.log', arguments);
+									}
+								});
+							}
 							var utilityUnit = new Unit({
 								initSetup: function(){
 									// reposition the browser to match parent or fall back to upper left
