@@ -244,7 +244,7 @@
 												top: [200, 0],
 												visibility: ['hidden', 'visible']
 											});
-											this.shim.fade(0.5);
+											this.shim.fade([0, 0.5]);
 											break;
 										case 'dismiss':
 											document.removeEvents('keydown');
@@ -255,11 +255,18 @@
 													}
 												}.bind(this)
 											});
+											var shimMorph = new Fx.Morph(this.shim, {
+												onComplete: function(){
+													this.shim.setStyle('visibility', 'hidden');
+												}.bind(this)
+											});
 											boxMorph.start({
 												opacity: [1, 0],
 												top: [0, 200]
 											});
-											this.shim.fade(0);
+											shimMorph.start({
+												opacity: [0.5, 0]
+											});
 											break;
 										default:
 									}
