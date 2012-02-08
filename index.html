@@ -9,7 +9,7 @@
 		<style>.gainlayout { min-width: 0; }</style>
 		<![endif]-->
 		<!--[if (IE 6)|(IE 8)]>
-		<script>window.MooToolsCoreVersion = '1.4.2';</script>
+		<script>window.MooToolsCoreVersion = '1.4.4';</script>
 		<![endif]-->
 		<!--[if lte IE 6]>
 		<style>.gainlayout { height: 1px; }</style>
@@ -25,7 +25,7 @@
 			    waitSeconds: 15
 			 });
 			(function(){
-				var MooToolsCoreVersion = window.MooToolsCoreVersion || '1.4.3', required = {
+				var MooToolsCoreVersion = window.MooToolsCoreVersion || '1.4.4', required = {
 					substitutions: {
 						base: './lib/js/'
 					},
@@ -256,10 +256,10 @@
 												}.bind(this)
 											});
 											boxMorph.start({
-												opacity: 0,
-												top: 200
+												opacity: [1, 0],
+												top: [0, 200]
 											});
-											this.shim.fade('out');
+											this.shim.fade(0);
 											break;
 										default:
 									}
