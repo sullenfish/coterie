@@ -6,11 +6,19 @@ html, body {
 	padding: 0;
 }
 
-/*
- * {
- -webkit-box-shadow: 0 0 1px red;
- }
- */
+// HTML5 Boilerplate Snippets recommended by David Walsh: http://davidwalsh.name/html5-boilerplate
+html { font-size: 100%; overflow-y: scroll; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+//::-moz-selection { background: #fe57a1; color: #fff; text-shadow: none; }
+//::selection { background: #fe57a1; color: #fff; text-shadow: none; }
+img { -ms-interpolation-mode: bicubic; }
+svg:not(:root) { overflow: hidden; }
+@media print {
+	img { max-width: 100% !important; }
+	p, h2, h3 { orphans: 3; widows: 3; }
+}
+
+// debugging
+// { -webkit-box-shadow: 0 0 1px red; }
 
 #outer, #outer div {
 	margin: 8px;
@@ -19,6 +27,8 @@ html, body {
 
 #pageConsole {
 	background-color: #F5F5F5;
+	font-family: Meslo, Menlo, Courier;
+	font-size: 0.9em;
 	height: 10em;
 	opacity: 0;
 	overflow-y: auto;
